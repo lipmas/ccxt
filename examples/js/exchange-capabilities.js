@@ -7,15 +7,21 @@ const ccxt        = require ('../../ccxt.js')
     , log         = require ('ololog').noLocate
     , ansi        = require ('ansicolor').nice
 
-;(async function test () {
 
+;(async function main () {
+    let filterMethods;
+    if (process.argv.length > 2) {
+        filterMethods = process.argv.slice(2);
+    }
+    let filterExchanges = ['binance', 'kraken', 'bittex', 'quionex', 'gdax', 'poloniex']
+    
     let total = 0
     let missing = 0
     let implemented = 0
     let emulated = 0
 
-    log (asTable (ccxt.exchanges.map (id => new ccxt[id]()).map (exchange => {
 
+    log (asTable (ccxt.exchanges.filter(id => filterExchanges.includes(id)).map(id => new ccxt[id]()).map (exchange => {
         let result = {};
 
         [
@@ -43,7 +49,9 @@ const ccxt        = require ('../../ccxt.js')
             'createDepositAddress',
             'withdraw',
 
-        ].forEach (key => {
+        ].filter( method => {
+            return (filterMethods !== undefined) ? filterMethods.includes(method) : true;
+        }).forEach (key => {
 
             total += 1
 
